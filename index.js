@@ -15,6 +15,7 @@ mongoose
   .connect(DB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
   })
   .then((e) =>
     console.log(
@@ -25,34 +26,36 @@ mongoose
 
 const Todo = mongoose.model("Todo", { title: String, status: String });
 
-app.get("/", (req, res) => {
-  return res.send("Hello World!");
-});
-
 // GET ALL
-app.get("/todos", async (req, res) => {
+app.get("/", async (req, res) => {
   const todos = await Todo.find({});
   return res.send(todos);
 });
 
 // GET ONE
-app.get("/todos/:id", async (req, res) => {
+app.get("/:id", async (req, res) => {
   const todo = await Todo.findById(req.params.id);
   return res.send(todo);
 });
 
 // CREATE
-app.post("/todos", async (req, res) => {
+app.post("/", async (req, res) => {
   let todo = new Todo({
     title: req.body.title,
     status: req.body.status,
   });
   todo = await todo.save();
-  return res.status(201).send(`Added new task ${todo._id}`);
+  return res.status(201).send(todo);
+});
+
+// UPDATE
+app.put("/:id", async (req, res) => {
+  const todo = await Todo.findByIdAndUpdate(req.params.id, { status: req.body.status });
+  return res.send(todo);
 });
 
 // DELETE
-app.delete("/todos/:id", async (req, res) => {
+app.delete("/:id", async (req, res) => {
   const todo = await Todo.findByIdAndDelete(req.params.id);
   return res.send(`Deleted task ${todo._id}`);
 });
